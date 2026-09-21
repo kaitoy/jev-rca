@@ -1,0 +1,53 @@
+{
+  "cis": [
+    { "id": "lb-01", "name": "Load Balancer 01", "type": "load_balancer", "description": "Public entry point for shop-web" },
+    { "id": "web-01", "name": "Web Server 01", "type": "web_server", "description": "nginx + static assets" },
+    { "id": "web-02", "name": "Web Server 02", "type": "web_server", "description": "nginx + static assets" },
+    { "id": "app-01", "name": "App Server 01", "type": "app_server", "description": "Node.js API" },
+    { "id": "db-01", "name": "PostgreSQL 01", "type": "database", "description": "Primary DB (VM)" },
+    { "id": "vm-03", "name": "VM 03", "type": "virtual_machine", "description": "Hosts db-01" },
+    { "id": "esx-01", "name": "ESXi Host 01", "type": "hypervisor", "description": "Runs vm-03" },
+    { "id": "san-01", "name": "SAN Array 01", "type": "storage", "description": "Datastore ds-03 backend" },
+    { "id": "sw-01", "name": "Core Switch 01", "type": "switch", "description": "Top-of-rack switch" },
+    { "id": "backup-01", "name": "Backup Server 01", "type": "server", "description": "Nightly backups" }
+  ],
+  "relations": [
+    { "from_ci": "lb-01", "to_ci": "web-01", "label": "routes_to" },
+    { "from_ci": "lb-01", "to_ci": "web-02", "label": "routes_to" },
+    { "from_ci": "web-01", "to_ci": "app-01", "label": "calls" },
+    { "from_ci": "web-02", "to_ci": "app-01", "label": "calls" },
+    { "from_ci": "app-01", "to_ci": "db-01", "label": "uses_db" },
+    { "from_ci": "db-01", "to_ci": "vm-03", "label": "hosted_on" },
+    { "from_ci": "vm-03", "to_ci": "esx-01", "label": "hosted_on" },
+    { "from_ci": "esx-01", "to_ci": "san-01", "label": "uses_storage" },
+    { "from_ci": "web-01", "to_ci": "sw-01", "label": "connected_to" },
+    { "from_ci": "web-02", "to_ci": "sw-01", "label": "connected_to" },
+    { "from_ci": "app-01", "to_ci": "sw-01", "label": "connected_to" },
+    { "from_ci": "esx-01", "to_ci": "sw-01", "label": "connected_to" },
+    { "from_ci": "backup-01", "to_ci": "sw-01", "label": "connected_to" }
+  ],
+  "services": [
+    { "id": "shop-web", "name": "Shop Web", "description": "Customer-facing storefront" },
+    { "id": "backup", "name": "Nightly Backup", "description": "Internal backup job" }
+  ],
+  "service_cis": [
+    { "service_id": "shop-web", "ci_id": "lb-01" },
+    { "service_id": "shop-web", "ci_id": "web-01" },
+    { "service_id": "shop-web", "ci_id": "web-02" },
+    { "service_id": "shop-web", "ci_id": "app-01" },
+    { "service_id": "shop-web", "ci_id": "db-01" },
+    { "service_id": "backup", "ci_id": "backup-01" }
+  ],
+  "events": [
+    { "ci_id": "web-01", "occurred_at": "2026-09-18T08:20:00Z", "severity": "info", "message": "Log rotation completed for /var/log/nginx", "source": "logrotate" },
+    { "ci_id": "san-01", "occurred_at": "2026-09-18T08:52:00Z", "severity": "critical", "message": "SAN latency spike >500ms on LUN 3 (datastore ds-03)", "source": "storage-monitor" },
+    { "ci_id": "sw-01", "occurred_at": "2026-09-18T08:53:00Z", "severity": "info", "message": "Scheduled config backup completed", "source": "netops" },
+    { "ci_id": "esx-01", "occurred_at": "2026-09-18T08:54:00Z", "severity": "warning", "message": "Datastore ds-03 I/O latency high (avg 420ms)", "source": "vcenter" },
+    { "ci_id": "db-01", "occurred_at": "2026-09-18T08:55:00Z", "severity": "error", "message": "Slow query threshold exceeded: 200+ queries >10s, disk wait high", "source": "pg-monitor" },
+    { "ci_id": "backup-01", "occurred_at": "2026-09-18T08:56:00Z", "severity": "info", "message": "Nightly backup job finished (2.1 TB)", "source": "bacula" },
+    { "ci_id": "app-01", "occurred_at": "2026-09-18T08:57:00Z", "severity": "error", "message": "DB connection pool exhausted; request timeouts to db-01", "source": "app-logs" },
+    { "ci_id": "web-02", "occurred_at": "2026-09-18T08:58:00Z", "severity": "error", "message": "Upstream timeout: 504 Gateway Timeout from app-01", "source": "nginx" },
+    { "ci_id": "web-01", "occurred_at": "2026-09-18T09:00:00Z", "severity": "critical", "message": "HTTP 5xx rate 45% (threshold 5%)", "source": "nginx" },
+    { "ci_id": "lb-01", "occurred_at": "2026-09-18T09:03:00Z", "severity": "warning", "message": "Backend web-01 marked unhealthy (health check failed 3x)", "source": "haproxy" }
+  ]
+}
