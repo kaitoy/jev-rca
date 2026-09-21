@@ -29,7 +29,7 @@ function AnalysisPage() {
   // candidates are ranked, so the first hit per CI is that CI's top verdict
   const nodes = graph.nodes.map((n) => {
     const c = candidates.find((c) => c.ci_id === n.id)
-    return { ...n, target: n.id === target.ci_id, origin: n.id === originCi, muted: !c && n.id !== target.ci_id, badge: c && { tone: verdictTone[c.verdict], label: verdictLabel[c.verdict] } }
+    return { ...n, target: n.id === target.ci_id, origin: n.id === originCi, muted: !c && n.id !== target.ci_id, badge: c && { tone: verdictTone[c.verdict], label: verdictLabel[c.verdict], title: c.message } }
   })
   return (
     <div className="flex flex-col gap-6 animate-message-in">

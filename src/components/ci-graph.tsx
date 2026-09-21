@@ -5,7 +5,7 @@ import { Badge, cx, type Tone } from './ui.tsx'
 
 export type GraphNode = {
   id: string; name: string; type: string; rank: number; col: number
-  muted?: boolean; target?: boolean; origin?: boolean; badge?: { tone: Tone; label: string }
+  muted?: boolean; target?: boolean; origin?: boolean; badge?: { tone: Tone; label: string; title?: string }
 }
 type GraphEdge = { from_ci: string; to_ci: string; label: string }
 type CiNode = Node<GraphNode, 'ci'>
@@ -24,8 +24,8 @@ function CiNodeView({ data }: NodeProps<CiNode>) {
       <div className="flex items-center gap-2">
         <span className="font-mono text-[11px] text-on-surface-variant">{data.type}</span>
         {data.origin
-          ? <Badge tone="error" className="ml-auto gap-1"><Flame strokeWidth={2.2} aria-hidden className="h-3 w-3" />Origin</Badge>
-          : data.badge && <Badge tone={data.badge.tone} className="ml-auto">{data.badge.label}</Badge>}
+          ? <Badge tone="error" className="ml-auto gap-1 cursor-help" title={data.badge?.title}><Flame strokeWidth={2.2} aria-hidden className="h-3 w-3" />Origin</Badge>
+          : data.badge && <Badge tone={data.badge.tone} className="ml-auto cursor-help" title={data.badge.title}>{data.badge.label}</Badge>}
       </div>
       <Handle type="source" position={Position.Bottom} />
     </div>
