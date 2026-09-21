@@ -38,7 +38,7 @@ RCA analysis (`runAnalysis`, `src/server/analysis.ts`) runs in this order:
 4. If two or more candidates tie for the top `P(root_cause)` bucket with verdict `root_cause` (Jev returns close to 1.0 across an entire causal chain), send one more `choice` question (`ORIGIN_QUESTION`, `buildOrigin`) with the tied candidates as its options, asking which is the origin. `tiedRootCauses` buckets with `toFixed(1)` so it matches SQLite `round(p, 1)`
 5. Save each candidate to `analysis_candidate` along with `P(root_cause)`, `p_origin` (NULL when not tied), etc., and rank with `RANK_ORDER` (`round(p_root_cause, 1) DESC, p_origin DESC, hops DESC, delta_seconds ASC`). Remaining ties are broken by preferring the more upstream event, then the earlier one
 
-Jev is weak at comparing dates or counting hops, so instead of passing raw numbers, `describeTiming` / `describeTopology` (`src/server/rca.ts`) turn them into natural-language sentences before putting them in the state.
+Jev is weak at comparing dates or counting hops, so instead of passing raw numbers, `describeTiming` / `describeTopology` (`src/server/rca.ts`) turn them into natural-language sentences before putting them in the state. Measured 2026-09-21 (13 hand-labeled candidates, 2 runs each, `RELATION_QUESTION` only): passing raw `deltaSeconds`/`hops` instead of the sentences dropped accuracy from 91% to 73%. All misses were sign errors — a candidate that occurred *after* the target (positive `deltaSeconds`) was still judged `root_cause` when the number was passed raw, but correctly judged `unrelated` when phrased as "N seconds AFTER the target". Hop count and multi-day deltas didn't show a similar gap in this sample.
 
 ### Server functions
 
