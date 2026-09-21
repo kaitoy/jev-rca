@@ -23,6 +23,7 @@ Submitting `data/sample.json` at `/import` loads a demo scenario (SAN failure â†
 pnpm test           # node --test (candidate gathering, BFS, wording)
 pnpm typecheck      # tsc --noEmit
 pnpm build
+pnpm preview        # serve the production build (after pnpm build)
 ```
 
 ## Structure
